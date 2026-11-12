@@ -662,11 +662,13 @@ footer small { color: var(--mute); font-size: 0.8rem; text-transform: uppercase;
     try {
       var d = await window.claude.use('db');
       if (!d) { st.textContent = 'Saving works is not available in this view. Open the page signed in to claude.ai as the owner.'; return; }
+      var u = await window.claude.use('user');
+      if (u && !(await u.canEdit())) { st.textContent = 'This account can view the page but cannot edit it. Open the page while signed in to claude.ai with the account that owns it, then add the work.'; return; }
       await d.collection('works').add({ title: title, cat: cat, img: pendingImg, at: Date.now() });
       st.className = 'status ok'; st.textContent = 'Added. It now shows in the Work section of the site.';
       document.getElementById('wTitle').value = ''; document.getElementById('wCat').value = ''; document.getElementById('wFile').value = '';
       pendingImg = ''; document.getElementById('wPrev').hidden = true;
-    } catch (e) { st.textContent = 'Could not add the work. You need Editor access to the page.'; }
+    } catch (e) { st.textContent = 'Could not add the work (' + ((e && (e.code || e.message)) || 'unknown error') + '). If this keeps happening, send the picture to Claude in chat and it will be added for you.'; }
   });
   startWorks();
   route();
